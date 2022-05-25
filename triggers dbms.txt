@@ -1,0 +1,558 @@
+
+SQL> create table sample (sid number, sname varchar(20));
+
+Table created.
+
+SQL> insert into sample values(&sid, '&Sname');
+Enter value for sid: 1
+Enter value for sname: A
+old   1: insert into sample values(&sid, '&Sname')
+new   1: insert into sample values(1, 'A')
+
+1 row created.
+
+SQL> /
+Enter value for sid: 2
+Enter value for sname: b
+old   1: insert into sample values(&sid, '&Sname')
+new   1: insert into sample values(2, 'b')
+
+1 row created.
+
+SQL> /
+Enter value for sid: 3
+Enter value for sname: c
+old   1: insert into sample values(&sid, '&Sname')
+new   1: insert into sample values(3, 'c')
+
+1 row created.
+
+SQL> /
+Enter value for sid: 4
+Enter value for sname: d
+old   1: insert into sample values(&sid, '&Sname')
+new   1: insert into sample values(4, 'd')
+
+1 row created.
+
+SQL> /
+Enter value for sid: 5
+Enter value for sname: e
+old   1: insert into sample values(&sid, '&Sname')
+new   1: insert into sample values(5, 'e')
+
+1 row created.
+
+SQL> /
+Enter value for sid: 6
+Enter value for sname: f
+old   1: insert into sample values(&sid, '&Sname')
+new   1: insert into sample values(6, 'f')
+
+1 row created.
+
+SQL> select *from sample;
+
+       SID SNAME
+---------- --------------------
+         1 A
+         2 b
+         3 c
+         4 d
+         5 e
+         6 f
+
+6 rows selected.
+
+
+
+SQL> > create or replace trigger t1
+SP2-0734: unknown command beginning "> create o..." - rest of line ignored.
+SQL>   before insert or update or delete on sample for each row
+SP2-0734: unknown command beginning "before ins..." - rest of line ignored.
+SQL>   begin
+  2    raise_application_error(-20000, 'you are not permitted to do INSERT/DELETE/UPDATE');
+  3    end;
+  4    /
+  begin
+*
+ERROR at line 1:
+ORA-20000: you are not permitted to do INSERT/DELETE/UPDATE
+ORA-06512: at line 2
+
+
+SQL> create or replace trigger t1
+  2  after insert on sample for each row
+  3  begin
+  4  raise_application_error(-20000, 'you are not permitted to do INSERT/DELETE/UPDATE');
+  5  end;
+  6  /
+
+Trigger created.
+
+SQL> insert into sample values(&sid, '&Sname');
+Enter value for sid: 9
+Enter value for sname: k
+old   1: insert into sample values(&sid, '&Sname')
+new   1: insert into sample values(9, 'k')
+insert into sample values(9, 'k')
+            *
+ERROR at line 1:
+ORA-20000: you are not permitted to do INSERT/DELETE/UPDATE
+ORA-06512: at "SYSTEM.T1", line 2
+ORA-04088: error during execution of trigger 'SYSTEM.T1'
+
+
+SQL>  create or replace trigger t1
+  2   after insert on sample for each row
+  3   beginraise_application_error(-20000, 'you are inserted a row'0;
+  4  
+  5  /
+ beginraise_application_error(-20000, 'you are inserted a row'0;
+ *
+ERROR at line 3:
+ORA-04079: invalid trigger specification
+
+
+SQL>  create or replace trigger t2
+  2  after insert on sample for each row
+  3  begin
+  4  raise_application_error(-20000, 'you are  INSERTED a row');
+  5  end;
+  6  /
+
+Trigger created.
+
+SQL> 
+SQL>  insert into sample values(&sid, '&Sname');
+Enter value for sid: 9
+Enter value for sname: k
+old   1:  insert into sample values(&sid, '&Sname')
+new   1:  insert into sample values(9, 'k')
+ insert into sample values(9, 'k')
+             *
+ERROR at line 1:
+ORA-20000: you are  INSERTED a row
+ORA-06512: at "SYSTEM.T2", line 2
+ORA-04088: error during execution of trigger 'SYSTEM.T2'
+
+
+.
+
+SQL>   create or replace trigger t2
+  2   after insert on sample for each row
+  3   begin
+  4   raise_application_error(-20000, 'you are  INSERTED a row');
+  5   end;
+  6   /
+
+Trigger created.
+
+SQL> create table professor (pNum number, pName varchar(20), salary number(5));
+
+Table created.
+
+SQL> insert into professor values(&num,'&name',&salary);
+
+
+Enter value for num: 1
+Enter value for name: g
+Enter value for salary: 40000
+old   1: insert into professor values(&num,'&name',&salary)
+new   1: insert into professor values(1,'g',40000)
+
+1 row created.
+
+SQL> /
+Enter value for num: 2
+Enter value for name: b
+Enter value for salary: 60000
+old   1: insert into professor values(&num,'&name',&salary)
+new   1: insert into professor values(2,'b',60000)
+
+1 row created.
+
+SQL> select *from professor
+  2  ;
+
+      PNUM PNAME                    SALARY
+---------- -------------------- ----------
+         1 g                         40000
+         2 b                         60000
+
+SQL>  insert into professor values(&num,'&name',&salary);
+Enter value for num: 5
+Enter value for name: j
+Enter value for salary: 70000
+old   1:  insert into professor values(&num,'&name',&salary)
+new   1:  insert into professor values(5,'j',70000)
+
+1 row created.
+
+SQL> create trigger minSalary BEFORE INSERT ON professor
+  2   FOR EACH ROW 
+  3   BEGIN
+  4   IF (:new.salary < 60000)
+  5   THEN RAISE_APPLICATION_ERROR(-20004,'voilation of Minimum professor Salary');
+  6   End if;
+  7   end;
+  8   /
+
+Trigger created.
+
+SQL>  insert into professor values(&num,'&name',&salary);
+Enter value for num: 8
+Enter value for name: l
+Enter value for salary: 45000
+old   1:  insert into professor values(&num,'&name',&salary)
+new   1:  insert into professor values(8,'l',45000)
+ insert into professor values(8,'l',45000)
+             *
+ERROR at line 1:
+ORA-20004: voilation of Minimum professor Salary
+ORA-06512: at "SYSTEM.MINSALARY", line 3
+ORA-04088: error during execution of trigger 'SYSTEM.MINSALARY'
+
+
+SQL> /
+Enter value for num: 67
+Enter value for name: gh
+Enter value for salary: 78000
+old   1:  insert into professor values(&num,'&name',&salary)
+new   1:  insert into professor values(67,'gh',78000)
+
+1 row created.
+
+SQL>   create table professor_backlog (pNum number, pName varchar(20), salary number(5));
+
+Table created.
+
+
+
+
+SQL> create or replace trigger backlog AFTER DELETE ON professor
+  2   FOR EACH ROW 
+  3   BEGIN
+  4  
+  5  INSERT INTO professor_backlog  values(:old.pNum,':old.pName',:old.salary);
+  6  
+  7   end;
+  8   /
+
+Trigger created.
+
+SQL> select *from professor;
+
+      PNUM PNAME                    SALARY
+---------- -------------------- ----------
+         1 g                         40000
+         2 b                         60000
+         5 j                         70000
+        67 gh                        78000
+
+SQL> delete from professor where pnum=1;
+
+1 row deleted.
+
+SQL> select *from professor_backlog;
+
+      PNUM PNAME                    SALARY
+---------- -------------------- ----------
+         1 :old.pName                40000
+
+SQL> select *from professor;
+
+      PNUM PNAME                    SALARY
+---------- -------------------- ----------
+         2 b                         60000
+         5 j                         70000
+        67 gh                        78000
+
+SQL>  
+
+
+
+SQL>  
+SQL>  create or replace trigger backlog AFTER DELETE ON professor
+  2   FOR EACH ROW 
+  3   BEGIN
+  4  
+  5  INSERT INTO professor_backlog  values(:old.pNum,:old.pName,:old.salary);
+  6  
+  7   end;
+  8   /
+
+Trigger created.
+
+SQL> delete from professor where pnum=2;
+
+1 row deleted.
+
+SQL>  select *from professor;
+
+      PNUM PNAME                    SALARY
+---------- -------------------- ----------
+         5 j                         70000
+        67 gh                        78000
+
+SQL>  select *from professor_backlog;
+
+      PNUM PNAME                    SALARY
+---------- -------------------- ----------
+         1 :old.pName                40000
+         2 b                         60000
+
+
+
+
+SQL> create table stud1 (roll_num number, name varchar(20), gender varchar(1)
+  2  CHECK (gender in ('M','F')));
+
+Table created.
+
+SQL> create table count (male number(4), female number(4));
+
+Table created.
+
+SQL> insert into count values(0,0);
+
+1 row created.
+
+
+
+SQL> select *from count;
+
+      MALE     FEMALE
+---------- ----------
+         0          0
+
+
+SQL> create or replace trigger count AFTER INSERT ON stud1
+  2   FOR EACH ROW 
+  3   BEGIN
+  4   IF (:new.gender = 'M')
+  5   THEN UPDATE count SET  male = male+1;
+  6   End if;
+  7   end;
+  8   /
+
+Trigger created.
+
+SQL> insert into stud1 values(&roll,'&name','&gender');
+Enter value for roll: 1
+Enter value for name: a
+Enter value for gender: M
+old   1: insert into stud1 values(&roll,'&name','&gender')
+new   1: insert into stud1 values(1,'a','M')
+
+1 row created.
+
+SQL> select *from count;
+
+      MALE     FEMALE
+---------- ----------
+         1          0
+
+
+
+SQL>   
+SQL>   create or replace trigger count AFTER INSERT ON stud1
+  2   FOR EACH ROW 
+  3   BEGIN
+  4   IF (:new.gender = 'M')
+  5   THEN UPDATE count SET  male = male+1;
+  6   ELSE
+  7   UPDATE count SET female = female+1;
+  8   
+  9  
+ 10   End if;
+ 11   end;
+ 12   /
+
+Trigger created.
+
+SQL>   insert into stud1 values (&roll,'&name','&gender');
+Enter value for roll: 2
+Enter value for name: b
+Enter value for gender: F
+old   1:   insert into stud1 values (&roll,'&name','&gender')
+new   1:   insert into stud1 values (2,'b','F')
+
+1 row created.
+
+SQL> /
+Enter value for roll: 3
+Enter value for name: c
+Enter value for gender: M
+old   1:   insert into stud1 values (&roll,'&name','&gender')
+new   1:   insert into stud1 values (3,'c','M')
+
+1 row created.
+
+SQL> /
+Enter value for roll: 4
+Enter value for name: D
+Enter value for gender: F
+old   1:   insert into stud1 values (&roll,'&name','&gender')
+new   1:   insert into stud1 values (4,'D','F')
+
+1 row created.
+
+SQL> select *from stud1;
+
+  ROLL_NUM NAME                 G
+---------- -------------------- -
+         1 a                    M
+         2 b                    F
+         3 c                    M
+         4 D                    F
+
+SQL> select *from count;
+
+      MALE     FEMALE
+---------- ----------
+         2          2
+
+
+
+
+SQL>   create table gold_price (price number(5),update_date date default SYSDATE);
+
+Table created.
+
+SQL> describe gold_price;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ PRICE                                              NUMBER(5)
+ UPDATE_DATE                                        DATE
+
+SQL> create table goldprice_backlog(price number(5), update_date date);
+
+Table created.
+
+
+SQL> describe goldprice_backlog;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ PRICE                                              NUMBER(5)
+ UPDATE_DATE                                        DATE
+
+
+
+SQL> insert into gold_price values(&price, SYSDATE);
+Enter value for price: 35000
+old   1: insert into gold_price values(&price, SYSDATE)
+new   1: insert into gold_price values(35000, SYSDATE)
+
+1 row created.
+
+SQL> select * from gold_price;
+
+     PRICE UPDATE_DA
+---------- ---------
+     35000 24-MAY-22
+
+
+
+
+SQL> select *from goldprice_backlog;
+
+no rows selected
+
+
+
+
+
+SQL> update gold_price SET price = 39000 where price = 38000;
+
+1 row updated.
+
+SQL> select *from gold_price;
+
+     PRICE UPDATE_DA
+---------- ---------
+     39000 25-MAY-22
+
+SQL> select *from goldprice_backlog;
+
+no rows selected
+
+SQL> update gold_price SET price = 40000;
+
+1 row updated.
+
+SQL> select *from gold_price;
+
+     PRICE UPDATE_DA
+---------- ---------
+     40000 25-MAY-22
+
+
+
+SQL> create or replace trigger gold  AFTER UPDATE ON gold_price
+  2   FOR EACH ROW 
+  3   BEGIN
+  4   INSERT INTO goldprice_backlog values(:old.price,:old.update_date);
+  5   
+  6  
+  7   end;
+  8    /
+
+Trigger created.
+
+SQL> update gold_price SET price = 41000;
+
+1 row updated.
+
+SQL> select *from gold_price;
+
+     PRICE UPDATE_DA
+---------- ---------
+     41000 25-MAY-22
+
+SQL> select * from goldprice_backlog;
+
+     PRICE UPDATE_DA
+---------- ---------
+     40000 25-MAY-22
+
+
+
+
+SQL>  update gold_price SET price = 42000, update_date = SYSDATE;
+
+1 row updated.
+
+SQL> select * from gold_price;
+
+     PRICE UPDATE_DA
+---------- ---------
+     42000 26-MAY-22
+
+SQL> select *from goldprice_backlog;
+
+     PRICE UPDATE_DA
+---------- ---------
+     40000 25-MAY-22
+     41000 25-MAY-22
+
+SQL>  update gold_price SET price = 43000, update_date = SYSDATE;
+
+1 row updated.
+
+SQL> select * from gold_price;
+
+     PRICE UPDATE_DA
+---------- ---------
+     43000 27-MAY-22
+
+SQL> select *from goldprice_backlog;
+
+     PRICE UPDATE_DA
+---------- ---------
+     40000 25-MAY-22
+     41000 25-MAY-22
+     42000 26-MAY-22
+
+SQL> 
+SQL> commit;
